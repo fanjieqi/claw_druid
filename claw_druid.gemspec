@@ -10,4 +10,8 @@ Gem::Specification.new do |s|
   s.homepage    =
     'http://galileo.tap4fun.com/fanjieqi/claw_druid'
   s.license       = 'MIT'
+
+  s.add_dependency 'rake', '~> 12.0'
+  s.add_dependency 'httparty', '~> 0.14.0'
+  s.add_dependency 'json', '~> 2.0', '>= 2.0.3'
 end
