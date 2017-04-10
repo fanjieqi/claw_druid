@@ -9,6 +9,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    awesome_print (1.7.0)
     httparty (0.14.0)
       multi_xml (>= 0.5.2)
     json (2.0.3)
@@ -19,6 +20,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  awesome_print (~> 1.7)
   claw_druid!
 
 BUNDLED WITH
