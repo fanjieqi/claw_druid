@@ -3,7 +3,7 @@ require 'json'
 require 'awesome_print'
 
 class ClawDruid
-  THRESHOLD = 10
+  THRESHOLD = 30
 
   def initialize(url = "", source = "")
     @url    = url
