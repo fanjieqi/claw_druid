@@ -16,10 +16,18 @@ class ClawDruid
 
   def group(*dimensions)
     @params[:queryType]  = "groupBy"
-    if dimensions.count == 1
-      @params[:dimension] = dimensions[0].to_s.strip
+    select(dimensions)
+    @params.delete(:metrics)
+    self
+  end
+
+  def select(*columns)
+    if columns.count == 1
+      @params[:dimension]   = columns[0].to_s.strip
+      @params[:metrics]     = columns[0].to_s.strip if @params[:queryType] == "select"
     else
-      @params[:dimensions] = dimensions.map(&:to_s).map(&:strip)
+      @params[:dimensions]  = columns.map(&:to_s).map(&:strip)
+      @params[:metrics]     = columns.map(&:to_s).map(&:strip) if @params[:queryType] == "select"
     end
     self
   end
