@@ -54,8 +54,10 @@ class ClawDruid
     else
       column = conditions.keys[0]
       values = conditions.values[0]
-      if values.count == 1
+      if !values.is_a?(Array)
         @params[:filter] = {type: "selector", dimension: column, value: values}
+      elsif values.count == 1
+        @params[:filter] = {type: "selector", dimension: column, value: values[0]}
       else
         @params[:filter] = {
           type: "or",
