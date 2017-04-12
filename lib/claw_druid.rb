@@ -113,7 +113,7 @@ class ClawDruid
       @params[:pagingSpec] = {pagingIdentifiers: @paging_identifiers[current][page_count - 1], threshold: THRESHOLD}
     else
       @current_page = page_count - 1
-      result = query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: THRESHOLD * @current_page}))
+      query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: THRESHOLD * @current_page}))
 
       last_identifiers = @paging_identifiers[current][page_count - 1]
       @params[:pagingSpec] = {pagingIdentifiers: last_identifiers, threshold: THRESHOLD}
@@ -127,11 +127,10 @@ class ClawDruid
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
     if @current_page && result["pagingIdentifiers"]
-      result = JSON.parse(result)[0]
       params.delete(:pagingSpec)
       current = params.hash
 
-      last_identifiers = result["result"]["pagingIdentifiers"]
+      last_identifiers = JSON.parse(result)[0]["result"]["pagingIdentifiers"]
       last_identifiers.each{|key, value| last_identifiers[key] += 1}
       @paging_identifiers[current][@current_page] = last_identifiers
       @current_page = nil
