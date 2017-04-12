@@ -11,6 +11,7 @@ class ClawDruid
 
     # The page_identifiers of every query, the key is the params.hash of the query, the value is a hash like {1 => identifiers1, 2 => identifiers2}
     @paging_identifiers = {}
+    # The current_page to control the setting of @paging_identifiers when need to find paging_identifiers from last page
     @current_page = nil
   end
 
@@ -111,13 +112,10 @@ class ClawDruid
     elsif @paging_identifiers[current][page_count - 1]
       @params[:pagingSpec] = {pagingIdentifiers: @paging_identifiers[current][page_count - 1], threshold: THRESHOLD}
     else
-      last_threshold = THRESHOLD * (page_count - 1)
-      last_page = query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: last_threshold}))
+      @current_page = page_count - 1
+      result = query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: THRESHOLD * @current_page}))
 
-      last_identifiers = last_page["result"]["pagingIdentifiers"]
-      last_identifiers.each{|key, value| last_identifiers[key] += 1}
-
-      @paging_identifiers[current][page_count - 1] = last_identifiers
+      last_identifiers = @paging_identifiers[current][page_count - 1]
       @params[:pagingSpec] = {pagingIdentifiers: last_identifiers, threshold: THRESHOLD}
       @current_page = page_count
     end
@@ -125,16 +123,18 @@ class ClawDruid
   end
 
   def query(params = @params)
-    HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' })
-  end
-
-  def inspect
     puts @params.to_json
-    result = HTTParty.post(@url, body: @params.to_json, headers: { 'Content-Type' => 'application/json' })
-    if result[:pagingIdentifiers]
-      @params.delete(:pagingSpec)
-      current = @params.hash
-      @paging_identifiers[current][@current_page] = result[:pagingIdentifiers]
+    result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
+    # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
+    if @current_page && result["pagingIdentifiers"]
+      result = JSON.parse(result)[0]
+      params.delete(:pagingSpec)
+      current = params.hash
+
+      last_identifiers = result["result"]["pagingIdentifiers"]
+      last_identifiers.each{|key, value| last_identifiers[key] += 1}
+      @paging_identifiers[current][@current_page] = last_identifiers
+      @current_page = nil
     end
     result
   end
