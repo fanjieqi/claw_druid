@@ -19,6 +19,7 @@ class ClawDruid
   end
 
   def sum(*columns)
+    @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] = columns.map{|column|
       { type: "doubleSum", name: column, fieldName: column }
     }
