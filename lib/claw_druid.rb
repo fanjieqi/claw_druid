@@ -20,7 +20,7 @@ class ClawDruid
 
   def group(*dimensions)
     @params[:queryType]  = "groupBy"
-    select(dimensions)
+    select(*dimensions)
     @params.delete(:metrics)
     self
   end
