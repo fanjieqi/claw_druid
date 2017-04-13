@@ -39,21 +39,21 @@ class ClawDruid
   def sum(*columns)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| { type: "doubleSum", name: column, fieldName: column } }
+    @params[:aggregations] += columns.map{|column| { type: "doubleSum", name: "sum_#{column}", fieldName: column } }
     self
   end
 
   def max(*columns)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| { type: "doubleMax", name: column, fieldName: column } }
+    @params[:aggregations] += columns.map{|column| { type: "doubleMax", name: "max_#{column}", fieldName: column } }
     self
   end
 
   def min(*columsn)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| { type: "doubleMin", name: column, fieldName: column } }
+    @params[:aggregations] += columns.map{|column| { type: "doubleMin", name: "min_#{column}", fieldName: column } }
     self
   end
 
