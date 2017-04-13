@@ -14,10 +14,8 @@ class ClawDruid
     @url    = url
     @params = {dataSource: source, granularity: "day", queryType: "select"}
 
-    # The page_identifiers of every query, the key is the params.hash of the query, the value is a hash like {1 => identifiers1, 2 => identifiers2}
+    # The page_identifiers of every query, the key is the params.hash of the query, the value is a identifiers like "publisher_daily_report_2017-02-02T00:00:00.000Z_2017-02-04T00:00:00.000Z_2017-03-30T12:10:27.053Z"
     @paging_identifiers = {}
-    # The current_page to control the setting of @paging_identifiers when need to find paging_identifiers from last page
-    @current_page = nil
   end
 
   def group(*dimensions)
@@ -110,19 +108,14 @@ class ClawDruid
   end
 
   def page(page_count)
-    current = @params.hash
-    @paging_identifiers[current] ||= {}
     if page_count == 1
       @params[:pagingSpec] = {pagingIdentifiers: {}, threshold: THRESHOLD}
-    elsif @paging_identifiers[current][page_count - 1]
-      @params[:pagingSpec] = {pagingIdentifiers: @paging_identifiers[current][page_count - 1], threshold: THRESHOLD}
-    else
-      @current_page = page_count - 1
-      query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: THRESHOLD * @current_page}))
+    else 
+      current = @params.hash
+      query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: THRESHOLD})) unless @paging_identifiers[current]
+      identifiers = @paging_identifiers[current]
 
-      last_identifiers = @paging_identifiers[current][page_count - 1]
-      @params[:pagingSpec] = {pagingIdentifiers: last_identifiers, threshold: THRESHOLD}
-      @current_page = page_count
+      @params[:pagingSpec] = {pagingIdentifiers: {identifiers => (page_count - 1) * THRESHOLD }, threshold: THRESHOLD}
     end
     self
   end
@@ -137,19 +130,17 @@ class ClawDruid
   end
 
   def query(params = @params)
-    puts @params.to_json
+    ap @params
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
     
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
-    if @current_page && result["pagingIdentifiers"]
+    if result["pagingIdentifiers"]
       params.delete(:pagingSpec)
       current = params.hash
 
-      last_identifiers = JSON.parse(result)[0]["result"]["pagingIdentifiers"]
-      last_identifiers.each{|key, value| last_identifiers[key] += 1}
-      @paging_identifiers[current][@current_page] = last_identifiers
-      @current_page = nil
+      @paging_identifiers[current] = JSON.parse(result)[0]["result"]["pagingIdentifiers"].keys[0]
     end
+    ap JSON.parse(result)
     
     result
   end
