@@ -4,6 +4,11 @@ require 'awesome_print'
 
 class ClawDruid
   THRESHOLD = 30
+  OPRATIONS = {
+    '<' => "lessThan",
+    '>' => 'greaterThan',
+    '=' => 'equalTo'
+  }
 
   def initialize(url = "", source = "")
     @url    = url
@@ -122,9 +127,19 @@ class ClawDruid
     self
   end
 
+  def having(*conditions)
+    # Process the ('a = ? and b = ?', 1, 2)
+    conditions[0].gsub!(" \?").each_with_index { |v, i| conditions[i + 1] }
+
+    @params[:having] = having_chain(nil, conditions[0])
+    ap @params
+    self
+  end
+
   def query(params = @params)
     puts @params.to_json
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
+    
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
     if @current_page && result["pagingIdentifiers"]
       params.delete(:pagingSpec)
@@ -135,7 +150,27 @@ class ClawDruid
       @paging_identifiers[current][@current_page] = last_identifiers
       @current_page = nil
     end
+    
     result
+  end
+
+  private
+  
+  def having_chain(relation, conditions)
+    if relation.nil?
+      if conditions[/[\(\))]/]
+        # Todo
+      elsif conditions[" and "] && !conditions[" or "]
+        { type: "and", havingSpecs: conditions.split(" and ").delete_if{|condition| condition == " and "}.map{|condition| having_chain(nil, condition)} }
+      elsif conditions[" or "]
+        { type: "or", havingSpecs: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| having_chain(nil, condition)} }
+      else
+        column, op, value = conditions.split(/( [\<\>\=] )/).map(&:strip)
+        { type: OPRATIONS[op], aggregation: column, value: value }
+      end
+    else
+      { type: relation, havingSpecs: conditions.map{|condition| having_chain(nil, condition)} }
+    end
   end
 
 end
