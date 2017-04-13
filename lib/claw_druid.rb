@@ -193,10 +193,9 @@ class ClawDruid
 
   def having(*conditions)
     # Process the ('a = ? and b = ?', 1, 2)
-    conditions[0].gsub!(" \?").each_with_index { |v, i| conditions[i + 1] }
+    conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" }
 
-    @params[:having] = having_chain(nil, conditions[0])
-    ap @params
+    @params[:having] = having_chain(conditions[0])
     self
   end
 
@@ -218,20 +217,15 @@ class ClawDruid
 
   private
   
-  def having_chain(relation, conditions)
-    if relation.nil?
-      if conditions[/[\(\))]/]
-        # Todo
-      elsif conditions[" and "] && !conditions[" or "]
-        { type: "and", havingSpecs: conditions.split(" and ").delete_if{|condition| condition == " and "}.map{|condition| having_chain(nil, condition)} }
-      elsif conditions[" or "]
-        { type: "or", havingSpecs: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| having_chain(nil, condition)} }
-      else
-        column, op, value = conditions.split(/( [\<\>\=] )/).map(&:strip)
-        { type: OPRATIONS[op], aggregation: column, value: value }
-      end
+  def having_chain(conditions)
+    # Todo: process the expression with brackets 
+    if conditions[" and "] && !conditions[" or "]
+      { type: "and", havingSpecs: conditions.split(" and ").delete_if{|condition| condition == " and "}.map{|condition| having_chain(condition)} }
+    elsif conditions[" or "]
+      { type: "or", havingSpecs: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| having_chain(condition)} }
     else
-      { type: relation, havingSpecs: conditions.map{|condition| having_chain(nil, condition)} }
+      column, op, value = conditions.split(/( [\<\>\=] )/).map(&:strip)
+      { type: OPRATIONS[op], aggregation: column, value: value }
     end
   end
 
