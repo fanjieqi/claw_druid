@@ -26,6 +26,14 @@ class ClawDruid
   end
 
   def select(*columns)
+    # Split the columns like ['sum(column_a) as sum_a, column_b']
+    columns = columns[0].split("\, ") if columns.count == 1 && columns[0]["\, "]
+
+    # Add the 'i' to regex to be case-insensitive, cause the sum, max and min could be SUM, MAX and MIN
+    post_columns = columns.select{|column| column[/(sum|max|min)\(.+\)/i] }
+    @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.empty?
+    columns -= post_columns
+
     if columns.count == 1
       @params[:dimension]   = columns[0].to_s.strip
       @params[:metrics]     = columns[0].to_s.strip if @params[:queryType] == "select"
@@ -218,6 +226,36 @@ class ClawDruid
       end
     else
       { type: relation, havingSpecs: conditions.map{|condition| having_chain(nil, condition)} }
+    end
+  end
+
+  def post_chain(sentences)
+    sentences, naming  = sentences.split(" as ")
+    naming           ||= sentences.gsub(" ","")
+    if sentences[/( (\+\+|\-\-|\*\*|\/\/) )/]
+      # Todo: process the expression with brackets 
+      if sentences[" ++ "]
+        { type: "arithmetic", name: naming, fn: "+", fields: sentences.split(" ++ ").map{|sentence| post_chain(sentence)} }
+      elsif sentences[" -- "]
+        # Count the left part firstly, then substract the right part
+        left, fn, right = sentences.rpartition(" -- ")
+        { type: "arithmetic", name: naming, fn: "-", fields: [post_chain(left), post_chain(right)] }
+      elsif sentences[" ** "]
+        { type: "arithmetic", name: naming, fn: "*", fields: sentences.split(" ** ").map{|sentence| post_chain(sentence)} }
+      elsif sentences[" // "]
+        # Count the left part firstly, then devided by the right part
+        left, fn, right = sentences.rpartition(" // ")
+        { type: "arithmetic", name: naming, fn: "/", fields: [post_chain(left), post_chain(right)] }
+      end
+    else
+      method    = sentences[/(sum|max|min)/i]
+      sentences = sentences.gsub(method,"").gsub(/[\(\)]/,"")
+      method.downcase!
+
+      # Add the column to aggregations, which name is like sum_column, min_column, max_column
+      send(method, sentences)
+
+      { type: "fieldAccess", name: naming, fieldName: "#{method}(#{sentences})" }
     end
   end
 
