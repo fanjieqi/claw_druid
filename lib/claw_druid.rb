@@ -37,7 +37,7 @@ class ClawDruid
     if columns.count == 1
       @params[:dimension]   = columns[0].to_s.strip
       @params[:metrics]     = columns[0].to_s.strip if @params[:queryType] == "select"
-    else
+    elsif columns.count > 1
       @params[:dimensions]  = columns.map(&:to_s).map(&:strip)
       @params[:metrics]     = columns.map(&:to_s).map(&:strip) if @params[:queryType] == "select"
     end
@@ -56,6 +56,8 @@ class ClawDruid
           name:         "sum(#{column})",
           fieldNames:   fields,
           fnAggregate:  "function(current, #{fields.join(', ')}) { return current + (#{column}); }",
+          fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
+          fnReset:      "function()                   { return 0; }"
         }
       else
         { type: "doubleSum", name: "sum(#{column})", fieldName: column } 
@@ -75,6 +77,8 @@ class ClawDruid
           name:         "max(#{column})",
           fieldNames:   fields,
           fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.max(current, (#{column})); }",
+          fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
+          fnReset:      "function()                   { return 0; }"
         }
       else
         { type: "doubleMax", name: "max(#{column})", fieldName: column } 
@@ -94,6 +98,8 @@ class ClawDruid
           name:         "min(#{column})",
           fieldNames:   fields,
           fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.min(current, (#{column})); }",
+          fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
+          fnReset:      "function()                   { return 0; }"
         }
       else
         { type: "doubleMin", name: "min(#{column})", fieldName: column } 
@@ -128,7 +134,7 @@ class ClawDruid
           end
         }
       }
-    else
+    elsif conditions.count == 1
       column = conditions.keys[0]
       values = conditions.values[0]
       if !values.is_a?(Array)
@@ -196,7 +202,6 @@ class ClawDruid
 
   def query(params = @params)
     ap @params
-    return
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
     
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
