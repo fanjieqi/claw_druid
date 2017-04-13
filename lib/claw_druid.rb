@@ -93,7 +93,7 @@ class ClawDruid
           type:         "javascript",
           name:         "min(#{column})",
           fieldNames:   fields,
-          fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.max(current, (#{column})); }",
+          fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.min(current, (#{column})); }",
         }
       else
         { type: "doubleMin", name: "min(#{column})", fieldName: column } 
@@ -196,6 +196,7 @@ class ClawDruid
 
   def query(params = @params)
     ap @params
+    return
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
     
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
