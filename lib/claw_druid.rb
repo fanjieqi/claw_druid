@@ -39,21 +39,58 @@ class ClawDruid
   def sum(*columns)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| { type: "doubleSum", name: "sum_#{column}", fieldName: column } }
+    @params[:aggregations] += columns.map{|column| 
+      if column[/( [\+\-\*\/] )/]
+        # split(/ [\+\-\*\/] /), and the result without the ' + ', ' - ', ' * ', ' / '
+        fields = column.split(/ [\+\-\*\/] /)
+        {
+          type:         "javascript",
+          name:         "sum(#{column})",
+          fieldNames:   fields,
+          fnAggregate:  "function(current, #{fields.join(', ')}) { return current + (#{column}); }",
+        }
+      else
+        { type: "doubleSum", name: "sum(#{column})", fieldName: column } 
+      end
+    }
     self
   end
 
   def max(*columns)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| { type: "doubleMax", name: "max_#{column}", fieldName: column } }
+    @params[:aggregations] += columns.map{|column| 
+      if column[/( [\+\-\*\/] )/]
+        fields = column.split(/ [\+\-\*\/] /)
+        {
+          type:         "javascript",
+          name:         "max(#{column})",
+          fieldNames:   fields,
+          fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.max(current, (#{column})); }",
+        }
+      else
+        { type: "doubleMax", name: "max(#{column})", fieldName: column } 
+      end
+    }
     self
   end
 
   def min(*columsn)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| { type: "doubleMin", name: "min_#{column}", fieldName: column } }
+    @params[:aggregations] += columns.map{|column| 
+      if column[/( [\+\-\*\/] )/]
+        fields = column.split(/ [\+\-\*\/] /)
+        {
+          type:         "javascript",
+          name:         "min(#{column})",
+          fieldNames:   fields,
+          fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.max(current, (#{column})); }",
+        }
+      else
+        { type: "doubleMin", name: "min(#{column})", fieldName: column } 
+      end
+    }
     self
   end
 
