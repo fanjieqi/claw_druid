@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     claw_druid (0.0.0)
+      awesome_print (~> 1.7)
       httparty (~> 0.14.0)
       json (~> 1.7)
       rake (~> 12.0)
@@ -20,7 +21,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  awesome_print (~> 1.7)
   claw_druid!
 
 BUNDLED WITH
