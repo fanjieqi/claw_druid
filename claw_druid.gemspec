@@ -13,6 +13,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rake', '~> 12.0'
   s.add_dependency 'httparty', '~> 0.14.0'
-  s.add_dependency 'json', '~> 2.0', '>= 2.0.3'
+  s.add_dependency 'json', '~> 1.7'
   s.add_development_dependency 'awesome_print', '~> 1.7'
 end
