@@ -144,15 +144,14 @@ class ClawDruid
       @params[:filter] = {
         type: "and",
         fields: conditions.map{|column, values|
-          if values.count == 1
+          if values.empty?
+            nil
+          elsif values.count == 1
             { type: "selector", dimension: column, value: values }
           else
-            {
-              type: "or",
-              fields: values.map{|value| {type: "selector", dimension: column, value: value} }
-            }
+            { type: "or", fields: values.map{|value| {type: "selector", dimension: column, value: value} } }
           end
-        }
+        }.compact
       }
     elsif conditions.count == 1
       column = conditions.keys[0]
