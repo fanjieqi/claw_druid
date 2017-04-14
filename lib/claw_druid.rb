@@ -1,5 +1,6 @@
 require 'httparty' 
 require 'json'
+require 'awesome_print'
 
 class ClawDruid
   THRESHOLD = 30
