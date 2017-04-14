@@ -1,5 +1,6 @@
 require 'bundler/gem_tasks'
 require 'claw_druid'
+require 'awesome_print'
 
 task :my_test do |variable|
 	client = ClawDruid.new("http://52.38.209.191:8092/druid/v2/", "publisher_daily_report")

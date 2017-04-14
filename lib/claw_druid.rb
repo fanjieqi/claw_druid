@@ -1,6 +1,5 @@
 require 'httparty' 
 require 'json'
-require 'awesome_print'
 
 class ClawDruid
   THRESHOLD = 30
@@ -212,7 +211,7 @@ class ClawDruid
   end
 
   def query(params = @params)
-    ap @params
+    ap @params if ENV['DEBUG']
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
     
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
@@ -222,7 +221,7 @@ class ClawDruid
 
       @paging_identifiers[current] = JSON.parse(result)[0]["result"]["pagingIdentifiers"].keys[0]
     end
-    ap JSON.parse(result)
+    ap JSON.parse(result) if ENV['DEBUG']
     
     result
   end
