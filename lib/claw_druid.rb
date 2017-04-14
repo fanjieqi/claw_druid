@@ -30,9 +30,18 @@ class ClawDruid
     columns = columns[0].split("\, ") if columns.count == 1 && columns[0]["\, "]
 
     # Add the 'i' to regex to be case-insensitive, cause the sum, max and min could be SUM, MAX and MIN
-    post_columns = columns.select{|column| column[/(sum|max|min)\(.+\)/i] }
+    post_columns = columns.select{|column| column[/(sum|max|min).+[\+\-\*\/]/i] }
     @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.empty?
     columns -= post_columns
+
+    %w(sum max min).each do |method|
+      tmp_columns = columns.select{|column| column[/#{method}/i] }
+      unless tmp_columns.empty?
+        columns -= tmp_columns
+        tmp_columns.map!{|column| column.gsub(/#{method}/i,"").gsub(/[\(\)]/,"")}
+        send(method, *tmp_columns)
+      end
+    end
 
     if columns.count == 1
       @params[:dimension]   = columns[0].to_s.strip
@@ -63,6 +72,7 @@ class ClawDruid
         { type: "doubleSum", name: "sum(#{column})", fieldName: column } 
       end
     }
+    @params[:aggregations].uniq!
     self
   end
 
@@ -84,6 +94,7 @@ class ClawDruid
         { type: "doubleMax", name: "max(#{column})", fieldName: column } 
       end
     }
+    @params[:aggregations].uniq!
     self
   end
 
@@ -105,6 +116,7 @@ class ClawDruid
         { type: "doubleMin", name: "min(#{column})", fieldName: column } 
       end
     }
+    @params[:aggregations].uniq!
     self
   end
 
@@ -252,7 +264,7 @@ class ClawDruid
       sentences = sentences.gsub(method,"").gsub(/[\(\)]/,"")
       method.downcase!
 
-      # Add the column to aggregations, which name is like sum_column, min_column, max_column
+      # Add the column to aggregations, which name is like sum(column), min(column), max(column)
       send(method, sentences)
 
       { type: "fieldAccess", name: naming, fieldName: "#{method}(#{sentences})" }
