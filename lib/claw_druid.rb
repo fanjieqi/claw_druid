@@ -9,9 +9,10 @@ class ClawDruid
     '=' => 'equalTo'
   }
 
-  def initialize(url = "", source = "")
-    @url    = url
-    @params = {dataSource: source, granularity: "day", queryType: "select"}
+  def initialize(params = {})
+    @url        = params[:url]
+    @params     = {dataSource: params[:source], granularity: "day", queryType: "select"}
+    @threshold  = params[:threshold] || THRESHOLD
 
     # The page_identifiers of every query, the key is the params.hash of the query, the value is a identifiers like "publisher_daily_report_2017-02-02T00:00:00.000Z_2017-02-04T00:00:00.000Z_2017-03-30T12:10:27.053Z"
     @paging_identifiers = {}
@@ -198,13 +199,13 @@ class ClawDruid
 
   def page(page_count)
     if page_count == 1
-      @params[:pagingSpec] = {pagingIdentifiers: {}, threshold: THRESHOLD}
+      @params[:pagingSpec] = {pagingIdentifiers: {}, threshold: @threshold}
     else 
       current = @params.hash
-      query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: THRESHOLD})) unless @paging_identifiers[current]
+      query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: @threshold})) unless @paging_identifiers[current]
       identifiers = @paging_identifiers[current]
 
-      @params[:pagingSpec] = {pagingIdentifiers: {identifiers => (page_count - 1) * THRESHOLD }, threshold: THRESHOLD}
+      @params[:pagingSpec] = {pagingIdentifiers: {identifiers => (page_count - 1) * @threshold }, threshold: @threshold}
     end
     self
   end
