@@ -68,7 +68,7 @@ class ClawDruid
         fields = column.split(/ [\+\-\*\/] /)
         {
           type:         "javascript",
-          name:         "sum(#{column})",
+          name:         naming,
           fieldNames:   fields,
           fnAggregate:  "function(current, #{fields.join(', ')}) { return current + (#{column}); }",
           fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
@@ -91,7 +91,7 @@ class ClawDruid
         fields = column.split(/ [\+\-\*\/] /)
         {
           type:         "javascript",
-          name:         "max(#{column})",
+          name:         naming,
           fieldNames:   fields,
           fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.max(current, (#{column})); }",
           fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
@@ -114,7 +114,7 @@ class ClawDruid
         fields = column.split(/ [\+\-\*\/] /)
         {
           type:         "javascript",
-          name:         "min(#{column})",
+          name:         naming,
           fieldNames:   fields,
           fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.min(current, (#{column})); }",
           fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
