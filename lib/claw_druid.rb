@@ -202,7 +202,7 @@ class ClawDruid
   def page(page_count)
     if page_count == 1
       @params[:pagingSpec] = {pagingIdentifiers: {}, threshold: @threshold}
-    else 
+    elsif page_count > 1
       current = @params.hash
       query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: @threshold})) unless @paging_identifiers[current]
       identifiers = @paging_identifiers[current]
