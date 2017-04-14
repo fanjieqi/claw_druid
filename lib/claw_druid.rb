@@ -37,7 +37,11 @@ class ClawDruid
       tmp_columns = columns.select{|column| column[/#{method}/i] }
       unless tmp_columns.empty?
         columns -= tmp_columns
-        tmp_columns.map!{|column| column.gsub(/#{method}/i,"").gsub(/[\(\)]/,"")}
+        tmp_columns.map! do |column| 
+          column, naming = column.split(" as ")
+          column.gsub!(/#{method}/i,"").gsub(/[\(\)]/,"")
+          [column, naming]
+        end
         send(method, *tmp_columns)
       end
     end
@@ -55,7 +59,8 @@ class ClawDruid
   def sum(*columns)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| 
+    @params[:aggregations] += columns.map{|column, naming| 
+      naming       ||= "sum(#{column})"
       if column[/( [\+\-\*\/] )/]
         # split(/ [\+\-\*\/] /), and the result without the ' + ', ' - ', ' * ', ' / '
         fields = column.split(/ [\+\-\*\/] /)
@@ -68,7 +73,7 @@ class ClawDruid
           fnReset:      "function()                   { return 0; }"
         }
       else
-        { type: "doubleSum", name: "sum(#{column})", fieldName: column } 
+        { type: "doubleSum", name: naming, fieldName: column } 
       end
     }
     @params[:aggregations].uniq!
@@ -78,7 +83,8 @@ class ClawDruid
   def max(*columns)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| 
+    @params[:aggregations] += columns.map{|column, naming| 
+      naming       ||= "max(#{column})"
       if column[/( [\+\-\*\/] )/]
         fields = column.split(/ [\+\-\*\/] /)
         {
@@ -90,7 +96,7 @@ class ClawDruid
           fnReset:      "function()                   { return 0; }"
         }
       else
-        { type: "doubleMax", name: "max(#{column})", fieldName: column } 
+        { type: "doubleMax", name: naming, fieldName: column } 
       end
     }
     @params[:aggregations].uniq!
@@ -100,7 +106,8 @@ class ClawDruid
   def min(*columsn)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column| 
+    @params[:aggregations] += columns.map{|column, naming| 
+      naming       ||= "min(#{column})"
       if column[/( [\+\-\*\/] )/]
         fields = column.split(/ [\+\-\*\/] /)
         {
@@ -112,7 +119,7 @@ class ClawDruid
           fnReset:      "function()                   { return 0; }"
         }
       else
-        { type: "doubleMin", name: "min(#{column})", fieldName: column } 
+        { type: "doubleMin", name: naming, fieldName: column } 
       end
     }
     @params[:aggregations].uniq!
