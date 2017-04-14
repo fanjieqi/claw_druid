@@ -21,7 +21,10 @@ class ClawDruid
 
   def group(*dimensions)
     @params[:queryType]  = "groupBy"
-    select(*dimensions)
+    if dimensions && dimensions.count > 0
+      @params[:dimensions] ||= []
+      @params[:dimensions]  += dimensions.map(&:to_s).map(&:strip)
+    end
     @params.delete(:metrics)
     self
   end
@@ -48,12 +51,11 @@ class ClawDruid
       end
     end
 
-    if columns.count == 1
-      @params[:dimension]   = columns[0].to_s.strip
-      @params[:metrics]     = columns[0].to_s.strip if @params[:queryType] == "select"
-    elsif columns.count > 1
-      @params[:dimensions]  = columns.map(&:to_s).map(&:strip)
-      @params[:metrics]     = columns.map(&:to_s).map(&:strip) if @params[:queryType] == "select"
+    if columns && columns.count > 0
+      @params[:dimensions] ||= []
+      @params[:dimensions]  += columns.map(&:to_s).map(&:strip)
+      @params[:metrics]    ||= []
+      @params[:metrics]     += columns.map(&:to_s).map(&:strip)# if @params[:queryType] == "select"
     end
     self
   end
@@ -219,7 +221,7 @@ class ClawDruid
   end
 
   def query(params = @params)
-    ap @params if ENV['DEBUG']
+    ap params if ENV['DEBUG']
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
     
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
