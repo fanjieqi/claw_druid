@@ -143,14 +143,16 @@ class ClawDruid
     end_date = conditions.delete(:end_date)
     @params[:intervals] = ["#{begin_date}/#{end_date}"]
 
+    conditions = conditions.delete_if{|key, value| value.blank?}
+
     if conditions.count > 1
       @params[:filter] = {
         type: "and",
         fields: conditions.map{|column, values|
-          if values.blank?
-            nil
-          elsif values.count == 1
+          if !values.is_a?(Array)
             { type: "selector", dimension: column, value: values }
+          elsif values.count == 1
+            { type: "selector", dimension: column, value: values[0] }
           else
             { type: "or", fields: values.map{|value| {type: "selector", dimension: column, value: value} } }
           end
