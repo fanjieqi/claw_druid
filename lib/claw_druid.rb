@@ -149,7 +149,7 @@ class ClawDruid
       elsif values.count == 1
         { type: "selector", dimension: column, value: values[0] }
       else
-        { type: "or", fields: values.map{|value| {type: "selector", dimension: column, value: value} } }
+        { type: "in", dimension: column, values: values }
       end
     }.compact
 
