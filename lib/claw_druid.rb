@@ -35,12 +35,12 @@ class ClawDruid
 
     # Add the 'i' to regex to be case-insensitive, cause the sum, max and min could be SUM, MAX and MIN
     post_columns = columns.select{|column| column[/(sum|max|min).+[\+\-\*\/]/i] }
-    @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.empty?
+    @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.blank?
     columns -= post_columns
 
     %w(sum max min).each do |method|
       tmp_columns = columns.select{|column| column[/#{method}/i] }
-      unless tmp_columns.empty?
+      unless tmp_columns.blank?
         columns -= tmp_columns
         tmp_columns.map! do |column| 
           column, naming = column.split(" as ")
@@ -146,7 +146,7 @@ class ClawDruid
       @params[:filter] = {
         type: "and",
         fields: conditions.map{|column, values|
-          if values.empty?
+          if values.blank?
             nil
           elsif values.count == 1
             { type: "selector", dimension: column, value: values }
