@@ -173,15 +173,23 @@ class ClawDruid
   end
 
   def order(*columns)
-    if @params[:queryType] == "groupBy"
-      @params[:limitSpec] = {
-        type: "default",
-        limit: 500000,
-        columns: columns
-      }
-    else
-      @params[:metric] = columns
+    columns = columns[0] if columns[0].is_a?(Hash)
+    
+    if @params[:queryType] != "groupBy"
+      @params[:metric] ||= []
+      @params[:metric] += columns.is_a?(Hash) ? columns.keys : columns.map{|column| column[0] }
     end
+    @params[:limitSpec] = {
+      type: "default",
+      limit: 500000,
+      columns: columns.map{|column, direction| 
+        {
+          dimension: (columns.is_a?(Hash) ? column : column[0]).to_s,
+          direction: (columns.is_a?(Hash) ? direction : column[1]).to_s[/asc/i] ? "ascending" : "descending",
+          dimensionOrder: "lexicographic"
+        }
+      }
+    }
     self
   end
 
