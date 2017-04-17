@@ -260,7 +260,6 @@ class ClawDruid
 
   def post_chain(sentences)
     sentences, naming  = sentences.split(" as ")
-    naming           ||= sentences.gsub(" ","")
     if sentences[/( (\+\+|\-\-|\*\*|\/\/) )/]
       # Todo: process the expression with brackets 
       if sentences[" ++ "]
