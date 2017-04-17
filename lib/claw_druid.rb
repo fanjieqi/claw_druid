@@ -163,10 +163,7 @@ class ClawDruid
       elsif values.count == 1
         @params[:filter] = {type: "selector", dimension: column, value: values[0]}
       else
-        @params[:filter] = {
-          type: "or",
-          fields: values.map{|value| {type: "selector", dimension: column, value: value} }
-        }
+        @params[:filter] = {type: "or", fields: values.map{|value| {type: "selector", dimension: column, value: value} } }
       end
     end
     self
