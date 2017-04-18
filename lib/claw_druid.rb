@@ -219,7 +219,9 @@ class ClawDruid
     # Process the ('a = ? and b = ?', 1, 2)
     conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" }
 
-    @params[:having] = having_chain(conditions[0])
+    havings = having_chain(conditions[0])
+    @params[:having] = havings unless havings.blank?
+    
     self
   end
 
@@ -291,9 +293,11 @@ class ClawDruid
       { type: "and", havingSpecs: conditions.split(" and ").delete_if{|condition| condition == " and "}.map{|condition| having_chain(condition)} }
     elsif conditions[" or "]
       { type: "or", havingSpecs: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| having_chain(condition)} }
-    else
+    elsif conditions[/[\<\>\=]/]
       column, op, value = conditions.split(/( [\<\>\=] )/).map(&:strip)
       { type: OPRATIONS[op], aggregation: column, value: value }
+    else
+      nil
     end
   end
 
