@@ -218,6 +218,7 @@ class ClawDruid
 
   def query(params = @params)
     ap params if ENV['DEBUG']
+    puts params.to_json if ENV['DEBUG']
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
     
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
