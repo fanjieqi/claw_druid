@@ -139,21 +139,28 @@ class ClawDruid
   end
 
   def where(conditions)
-    begin_date = conditions.delete(:begin_date)
-    end_date = conditions.delete(:end_date)
-    @params[:intervals] = ["#{begin_date}/#{end_date}"]
+    if conditions.is_a?(Hash)
+      begin_date = conditions.delete(:begin_date)
+      end_date = conditions.delete(:end_date)
+      @params[:intervals] = ["#{begin_date}/#{end_date}"]
 
-    conditions = conditions.delete_if{|key, value| value.blank?}.map{|column, values|
-      if !values.is_a?(Array)
-        { type: "selector", dimension: column, value: values }
-      elsif values.count == 1
-        { type: "selector", dimension: column, value: values[0] }
-      else
-        { type: "in", dimension: column, values: values }
-      end
-    }.compact
+      conditions = conditions.delete_if{|key, value| value.blank?}.map{|column, values|
+        if !values.is_a?(Array)
+          { type: "selector", dimension: column, value: values }
+        elsif values.count == 1
+          { type: "selector", dimension: column, value: values[0] }
+        else
+          { type: "in", dimension: column, values: values }
+        end
+      }.compact
+    elsif conditions.is_a?(Array) && conditions[0][" \?"]
+      conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" }
+      conditions = [where_chain( conditions[0] )]
+    elsif conditions.is_a?(String)
+      conditions = [where_chain( conditions )]
+    end
 
-    if conditions
+    unless conditions.blank?
       @params[:filter]          ||= { type: "and", fields: [] }
       @params[:filter][:fields]  += conditions
     end
