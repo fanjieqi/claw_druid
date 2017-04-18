@@ -257,6 +257,11 @@ class ClawDruid
     self
   end
 
+  def source_meta
+    @params[:queryType] = "dataSourceMetadata"
+    self
+  end
+
   private
 
   def where_chain(conditions)
