@@ -35,6 +35,7 @@ class ClawDruid
   def select(*columns)
     # Split the columns like ['sum(column_a) as sum_a, column_b']
     columns = columns[0].split("\, ") if columns.count == 1 && columns[0].is_a?(String) && columns[0]["\, "]
+    columns = columns[0]              if columns.count == 1 && columns[0].is_a?(Array)
 
     return self if columns.all?{|column| column.blank? }
 
