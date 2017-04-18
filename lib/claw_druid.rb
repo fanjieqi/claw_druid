@@ -21,6 +21,8 @@ class ClawDruid
   end
 
   def group(*dimensions)
+    dimensions = dimensions[0] if dimensions.count == 1 && dimensions[0].is_a?(Array)
+
     @params[:queryType]  = "groupBy"
     if dimensions && dimensions.count > 0
       @params[:dimensions] ||= []
@@ -32,7 +34,9 @@ class ClawDruid
 
   def select(*columns)
     # Split the columns like ['sum(column_a) as sum_a, column_b']
-    columns = columns[0].split("\, ") if columns.count == 1 && columns[0]["\, "]
+    columns = columns[0].split("\, ") if columns.count == 1 && columns[0].is_a?(String) && columns[0]["\, "]
+
+    return self if columns.all?{|column| column.blank? }
 
     # Add the 'i' to regex to be case-insensitive, cause the sum, max and min could be SUM, MAX and MIN
     post_columns = columns.select{|column| column[/(sum|max|min).+[\+\-\*\/]/i] }
@@ -62,6 +66,8 @@ class ClawDruid
   end
 
   def sum(*columns)
+    columns = columns[0] if columns.count == 1 and columns[0].is_a?(Array)
+
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
     @params[:aggregations] += columns.map{|column, naming| 
@@ -86,6 +92,8 @@ class ClawDruid
   end
 
   def max(*columns)
+    columns = columns[0] if columns.count == 1 and columns[0].is_a?(Array)
+
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
     @params[:aggregations] += columns.map{|column, naming| 
@@ -109,6 +117,8 @@ class ClawDruid
   end
 
   def min(*columns)
+    columns = columns[0] if columns.count == 1 and columns[0].is_a?(Array)
+
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
     @params[:aggregations] += columns.map{|column, naming| 
