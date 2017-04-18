@@ -108,7 +108,7 @@ class ClawDruid
     self
   end
 
-  def min(*columsn)
+  def min(*columns)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
     @params[:aggregations] += columns.map{|column, naming| 
