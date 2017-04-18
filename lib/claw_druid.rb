@@ -268,10 +268,10 @@ class ClawDruid
 
   def where_chain(conditions)
     # Todo: process the expression with brackets 
-    if conditions[" and "] && !conditions[" or "]
-      { type: "and", fields: conditions.split(" and ").delete_if{|condition| condition == " and "}.map{|condition| where_chain(condition)} }
-    elsif conditions[" or "]
+    if conditions[" or "]
       { type: "or", fields: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| where_chain(condition)} }
+    elsif conditions[" and "]
+      { type: "and", fields: conditions.split(" and ").delete_if{|condition| condition == " and "}.map{|condition| where_chain(condition)} }
     elsif conditions[" in "]
       column, op, values = conditions.split(/( (in) )/).map(&:strip)
       { type: "in", dimension: column, values: JSON.parse(values) }
