@@ -240,6 +240,23 @@ class ClawDruid
     result
   end
 
+  def time_boundary
+    @params[:queryType] = "timeBoundary"
+    self
+  end
+
+  def max_time
+    @params[:queryType] = "timeBoundary"
+    @params[:bound]     = "maxTime"
+    self
+  end
+
+  def min_time
+    @params[:queryType] = "timeBoundary"
+    @params[:bound]     = "minTime"
+    self
+  end
+
   private
 
   def where_chain(conditions)
