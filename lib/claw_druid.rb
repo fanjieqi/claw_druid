@@ -274,6 +274,11 @@ class ClawDruid
     self
   end
 
+  def segment_meta
+    @params[:queryType] = "segmentMetadata"
+    self
+  end
+
   private
 
   def where_chain(conditions)
