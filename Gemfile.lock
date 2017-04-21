@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    claw_druid (0.0.0)
+    claw_druid (0.0.1)
       activesupport (= 4.2.3)
       awesome_print (~> 1.7)
       httparty (~> 0.14.0)
