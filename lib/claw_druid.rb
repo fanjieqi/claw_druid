@@ -184,6 +184,7 @@ class ClawDruid
     if @params[:queryType] != "groupBy"
       @params[:metric] ||= []
       @params[:metric] += columns.is_a?(Hash) ? columns.keys : columns.map{|column| column[0] }
+      @params[:descending] = columns.any?{|column, direction| direction.to_s[/desc/]}
     end
     @params[:limitSpec] = {
       type: "default",
