@@ -2,6 +2,7 @@ require 'httparty'
 require 'json'
 require 'awesome_print'
 require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/hash/transform_values'
 
 class ClawDruid
   THRESHOLD = ENV["DEBUG"] ? 5 : 30
@@ -219,10 +220,15 @@ class ClawDruid
       @params[:pagingSpec] = {pagingIdentifiers: {}, threshold: @threshold}
     elsif page_count > 1
       current = @params.hash
-      query(@params.merge(pagingSpec: {pagingIdentifiers:  {}, threshold: @threshold})) unless @paging_identifiers[current]
-      identifiers = @paging_identifiers[current]
+      @paging_identifiers[current] ||= {0 => {}}
 
-      @params[:pagingSpec] = {pagingIdentifiers: {identifiers => (page_count - 1) * @threshold }, threshold: @threshold}
+      (1..page_count-1).each do |current_page|
+        if begin @paging_identifiers[current][current_page].nil? rescue true end
+          query(@params.merge(pagingSpec: {pagingIdentifiers: @paging_identifiers[current][current_page-1], threshold: @threshold}), current_page)
+        end
+      end if begin @paging_identifiers[current][page_count - 1].nil? rescue true end
+
+      @params[:pagingSpec] = {pagingIdentifiers: @paging_identifiers[current][page_count - 1], threshold: @threshold}
     end
     self
   end
@@ -237,17 +243,19 @@ class ClawDruid
     self
   end
 
-  def query(params = @params)
+  def query(params = @params, page_count = nil)
     ap params if ENV['DEBUG']
     puts params.to_json if ENV['DEBUG']
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' }).body
-    
+
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
-    if result["pagingIdentifiers"]
+    if page_count && result["pagingIdentifiers"]
       params.delete(:pagingSpec)
       current = params.hash
 
-      @paging_identifiers[current] = JSON.parse(result)[0]["result"]["pagingIdentifiers"].keys[0]
+      # The pagingIdentifiers is something like { "publisher_daily_report_2017-03-01T00:00:00.000Z_2017-03-11T00:00:00.000Z_2017-04-17T21:04:30.804Z" => -10 }
+      @paging_identifiers[current]            ||= {}
+      @paging_identifiers[current][page_count]  = JSON.parse(result)[0]["result"]["pagingIdentifiers"].transform_values{|value| value + 1}
     end
     ap JSON.parse(result) if ENV['DEBUG']
     
