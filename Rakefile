@@ -1,5 +1,5 @@
 require 'bundler/gem_tasks'
-require 'claw_druid'
+require './lib/claw_druid'
 require 'awesome_print'
 
 task :my_test do |variable|
