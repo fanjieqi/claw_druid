@@ -4,7 +4,7 @@ require 'awesome_print'
 require 'active_support/core_ext/object/blank'
 
 class ClawDruid
-  THRESHOLD = 30
+  THRESHOLD = ENV["DEBUG"] ? 5 : 30
   OPRATIONS = {
     '<' => "lessThan",
     '>' => 'greaterThan',
