@@ -13,7 +13,7 @@ class ClawDruid
 
   def initialize(params = {})
     @url        = params[:url]
-    @params     = {dataSource: params[:source], granularity: "day", queryType: "select"}
+    @params     = {dataSource: params[:source], granularity: "all", queryType: "select"}
     @threshold  = params[:threshold] || THRESHOLD
 
     # The page_identifiers of every query, the key is the params.hash of the query, the value is a identifiers like "publisher_daily_report_2017-02-02T00:00:00.000Z_2017-02-04T00:00:00.000Z_2017-03-30T12:10:27.053Z"
