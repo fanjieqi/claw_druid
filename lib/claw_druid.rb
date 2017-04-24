@@ -5,6 +5,8 @@ require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/hash/transform_values'
 
 class ClawDruid
+  include Enumerable
+
   THRESHOLD = ENV["DEBUG"] ? 5 : 30
   OPRATIONS = {
     '<' => "lessThan",
@@ -287,6 +289,22 @@ class ClawDruid
   def segment_meta
     @params[:queryType] = "segmentMetadata"
     self
+  end
+
+  def to_s
+    query
+  end
+
+  def to_a
+    JSON.parse(query)[0]["result"]["events"]
+  end
+
+  def each(&block)
+    to_a.each(&block)
+  end
+
+  def map(&block)
+    to_a.map(&block)
   end
 
   private
