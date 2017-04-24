@@ -145,10 +145,16 @@ class ClawDruid
     self
   end
 
-  def count
+  def count(*columns)
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
-    @params[:aggregations] << { type: "count", name: "count" }
+    if columns.empty?
+      @params[:aggregations] << { type: "count", name: "count" }
+    elsif columns.count == 1
+      @params[:aggregations] << { type: "cardinality", name: "count(#{columns[0]})", fields: columns }
+    else
+      @params[:aggregations] += columns.map{|column| { type: "cardinality", name: "count(#{column})", fields: [column] } }
+    end
     self
   end
 
@@ -259,7 +265,7 @@ class ClawDruid
       @paging_identifiers[current]            ||= {}
       @paging_identifiers[current][page_count]  = JSON.parse(result)[0]["result"]["pagingIdentifiers"].transform_values{|value| value + 1}
     end
-    ap JSON.parse(result) if ENV['DEBUG']
+    # ap JSON.parse(result) if ENV['DEBUG']
     
     result
   end
