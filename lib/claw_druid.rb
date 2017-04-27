@@ -188,7 +188,7 @@ class ClawDruid
   end
 
   def order(*columns)
-    columns = columns[0] if columns[0].is_a?(Hash)
+    columns = columns[0] if columns[0].is_a?(Hash) || columns[0].is_a?(Array)
     
     if @params[:queryType] != "groupBy"
       @params[:metric] ||= []
@@ -200,8 +200,8 @@ class ClawDruid
       limit: 500000,
       columns: columns.map{|column, direction| 
         {
-          dimension: (columns.is_a?(Hash) ? column : column[0]).to_s,
-          direction: (columns.is_a?(Hash) ? direction : column[1]).to_s[/asc/i] ? "ascending" : "descending",
+          dimension: (columns.is_a?(Hash) ? column : column).to_s,
+          direction: (columns.is_a?(Hash) ? direction : "asc").to_s[/asc/i] ? "ascending" : "descending",
           dimensionOrder: "lexicographic"
         }
       }
