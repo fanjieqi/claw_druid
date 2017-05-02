@@ -219,7 +219,7 @@ class ClawDruid
   def top(top_count)
     @params[:queryType] = "topN"
     @params[:threshold] = top_count
-    @params[:metric] = @params.delete(:limitSpec)[:columns][0]
+    @params[:metric] = @params.delete(:limitSpec)[:columns][0] if @params[:limitSpec]
     self
   end
 
