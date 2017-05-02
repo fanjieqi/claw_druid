@@ -61,10 +61,8 @@ class ClawDruid
     end
 
     if columns && columns.count > 0
-      @params[:dimensions] ||= []
-      @params[:dimensions]  += columns.map(&:to_s).map(&:strip)
       @params[:metrics]    ||= []
-      @params[:metrics]     += columns.map(&:to_s).map(&:strip)# if @params[:queryType] == "select"
+      @params[:metrics]     += columns.map(&:to_s).map(&:strip)
     end
     self
   end
