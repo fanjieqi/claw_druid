@@ -8,7 +8,7 @@ class ClawDruid
   include Enumerable
 
   THRESHOLD = ENV["DEBUG"] ? 5 : 30
-  OPRATIONS = {
+  OPERATIONS = {
     '<' => "lessThan",
     '>' => 'greaterThan',
     '=' => 'equalTo'
@@ -342,7 +342,7 @@ class ClawDruid
       { type: "or", havingSpecs: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| having_chain(condition)} }
     elsif conditions[/[\<\>\=]/]
       column, op, value = conditions.split(/( [\<\>\=] )/).map(&:strip)
-      { type: OPRATIONS[op], aggregation: column, value: value }
+      { type: OPERATIONS[op], aggregation: column, value: value },
     else
       nil
     end
