@@ -342,7 +342,7 @@ class ClawDruid
       { type: "or", havingSpecs: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| having_chain(condition)} }
     elsif conditions[/[\<\>\=]/]
       column, op, value = conditions.split(/( [\<\>\=] )/).map(&:strip)
-      { type: OPERATIONS[op], aggregation: column, value: value },
+      { type: OPERATIONS[op], aggregation: column, value: value.to_f }
     else
       nil
     end
