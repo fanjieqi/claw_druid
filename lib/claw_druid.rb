@@ -48,7 +48,7 @@ class ClawDruid
     @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.blank?
 
     %w(sum max min).each do |method|
-      tmp_columns = columns.select{|column| column[/#{method}/i] }
+      tmp_columns = columns.select{|column| column.is_a?(String) && column[/#{method}/i] }
       unless tmp_columns.blank?
         columns -= tmp_columns
         tmp_columns.map! do |column| 
