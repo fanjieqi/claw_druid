@@ -381,7 +381,7 @@ class ClawDruid
         {
           type:       "lookup",
           dimension:  columns[:dimension] || columns["dimension"],
-          outputName: columns[:output],
+          outputName: columns[:output] || columns["output"],
           name:       columns[:lookup] || columns["lookup"],
         }
       }
