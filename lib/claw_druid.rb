@@ -44,9 +44,8 @@ class ClawDruid
     return self if columns.all?{|column| column.blank? }
 
     # Add the 'i' to regex to be case-insensitive, cause the sum, max and min could be SUM, MAX and MIN
-    post_columns = columns.select{|column| column[/(sum|max|min).+[\+\-\*\/]/i] }
+    post_columns = columns.except{|column| column[/(sum|max|min).+[\+\-\*\/]/i] }
     @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.blank?
-    columns -= post_columns
 
     %w(sum max min).each do |method|
       tmp_columns = columns.select{|column| column[/#{method}/i] }
