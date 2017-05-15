@@ -51,18 +51,8 @@ class ClawDruid
     post_columns = columns.except{|column| column[/(sum|max|min).+[\+\-\*\/]/i] }
     @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.blank?
 
-    %w(sum max min).each do |method|
-      tmp_columns = columns.select{|column| column.is_a?(String) && column[/#{method}/i] }
-      unless tmp_columns.blank?
-        columns -= tmp_columns
-        tmp_columns.map! do |column| 
-          column, naming = column.split(" as ")
-          column.gsub!(/#{method}/i,"").gsub(/[\(\)]/,"")
-          [column, naming]
-        end
-        send(method, *tmp_columns)
-      end
-    end
+    method_columns = columns.except{|column| column.is_a?(String) && column[/(sum|max|min)\(.+\)/i] }
+    select_method_column(method_columns)
 
     lookup_columns = columns.except{|column| column.is_a? Hash }
     select_lookup(lookup_columns)
@@ -396,6 +386,14 @@ class ClawDruid
         }
       }
     end
+  end
+
+  def select_method_column(columns)
+    columns.each do |column|
+      method = column[/(sum|max|min)/i]
+      column = column.split(" as ")[0].gsub(/#{method}/i,"").gsub(/[\(\)]/,"")
+      send(method, column)
+    end if columns.present?
   end
 
 end
