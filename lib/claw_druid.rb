@@ -3,6 +3,7 @@ require 'json'
 require 'awesome_print'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/hash/transform_values'
+require './lib/array'
 
 class ClawDruid
   include Enumerable
@@ -60,6 +61,9 @@ class ClawDruid
       end
     end
 
+    lookup_columns = columns.except{|column| column.is_a? Hash }
+    select_lookup(lookup_columns)
+    
     if columns && columns.count > 0
       @params[:metrics]    ||= []
       @params[:metrics]     += columns.map(&:to_s).map(&:strip)
@@ -374,6 +378,20 @@ class ClawDruid
       send(method, sentences)
 
       { type: "fieldAccess", name: naming, fieldName: "#{method}(#{sentences})" }
+    end
+  end
+
+  def select_lookup(columns)
+    if columns.present?
+      @params[:dimension] ||= []
+      @params[:dimension]  += columns.map{|columns|
+        {
+          type:       "lookup",
+          dimension:  columns[:dimension] || columns["dimension"],
+          outputName: columns[:output],
+          name:       columns[:lookup] || columns["lookup"],
+        }
+      }
     end
   end
 
