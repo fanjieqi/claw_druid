@@ -382,8 +382,8 @@ class ClawDruid
 
   def select_lookup(columns)
     if columns.present?
-      @params[:dimension] ||= []
-      @params[:dimension]  += columns.map{|columns|
+      @params[:dimensions] ||= []
+      @params[:dimensions]  += columns.map{|columns|
         {
           type:       "lookup",
           dimension:  columns[:dimension] || columns["dimension"],
