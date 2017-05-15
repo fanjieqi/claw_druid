@@ -28,6 +28,10 @@ class ClawDruid
     dimensions = dimensions[0] if dimensions.count == 1 && dimensions[0].is_a?(Array)
 
     @params[:queryType]  = "groupBy"
+
+    lookup_dimensions = dimensions.except{|dimension| dimension.is_a? Hash }
+    select_lookup(lookup_dimensions)
+
     if dimensions && dimensions.count > 0
       @params[:dimensions] ||= []
       @params[:dimensions]  += dimensions.map(&:to_s).map(&:strip)
