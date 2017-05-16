@@ -52,7 +52,7 @@ class ClawDruid
     @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.blank?
 
     method_columns = columns.except{|column| column.is_a?(String) && column[/(sum|max|min|count)\(.+\)/i] }
-    select_method_column(method_columns)
+    method_columns.each{|column| method_column(column) }
 
     lookup_columns = columns.except{|column| column.is_a? Hash }
     select_lookup(lookup_columns)
@@ -364,12 +364,7 @@ class ClawDruid
         { type: "arithmetic", name: naming, fn: "/", fields: [post_chain(left), post_chain(right)] }
       end
     else
-      method    = sentences[/(sum|max|min|count)/i]
-      sentences = sentences.gsub(method,"").gsub(/[\(\)]/,"")
-      method.downcase!
-
-      # Add the column to aggregations, which name is like sum(column), min(column), max(column)
-      send(method, sentences)
+      method_column(sentences)
 
       { type: "fieldAccess", name: naming, fieldName: "#{method}(#{sentences})" }
     end
@@ -389,12 +384,12 @@ class ClawDruid
     end
   end
 
-  def select_method_column(columns)
-    columns.each do |column|
-      method = column[/(sum|max|min|count)/i]
-      column = column.split(" as ")[0].gsub(/#{method}/i,"").gsub(/[\(\)]/,"")
-      send(method, column)
-    end if columns.present?
+  def method_column(column)
+    method = column[/(sum|max|min|count)/i].downcase
+    column = column.split(" as ")[0].gsub(/#{method}/i,"").gsub(/[\(\)]/,"")
+
+    # Add the column to aggregations, which name is like sum(column), min(column), max(column), count(column)
+    send(method, column)
   end
 
 end
