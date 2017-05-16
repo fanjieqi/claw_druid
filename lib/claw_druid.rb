@@ -313,11 +313,11 @@ class ClawDruid
   def where_chain(conditions)
     # Todo: process the expression with brackets 
     if conditions[" or "]
-      { type: "or", fields: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| where_chain(condition)} }
+      { type: "or", fields: conditions.split(" or ").map{|condition| where_chain(condition)} }
     elsif conditions[" and "]
-      { type: "and", fields: conditions.split(" and ").delete_if{|condition| condition == " and "}.map{|condition| where_chain(condition)} }
+      { type: "and", fields: conditions.split(" and ").map{|condition| where_chain(condition)} }
     elsif conditions[" in "]
-      column, op, values = conditions.split(/( (in) )/).map(&:strip)
+      column, values = conditions.split(" in ").map(&:strip)
       { type: "in", dimension: column, values: JSON.parse(values) }
     else
       column, op, value = conditions.split(/ (\<|\>|\=|\~|regex) /).map(&:strip)
@@ -335,9 +335,9 @@ class ClawDruid
   def having_chain(conditions)
     # Todo: process the expression with brackets 
     if conditions[" and "] && !conditions[" or "]
-      { type: "and", havingSpecs: conditions.split(" and ").delete_if{|condition| condition == " and "}.map{|condition| having_chain(condition)} }
+      { type: "and", havingSpecs: conditions.split(" and ").map{|condition| having_chain(condition)} }
     elsif conditions[" or "]
-      { type: "or", havingSpecs: conditions.split(" or ").delete_if{|condition| condition == " or "}.map{|condition| having_chain(condition)} }
+      { type: "or", havingSpecs: conditions.split(" or ").map{|condition| having_chain(condition)} }
     elsif conditions[/[\<\>\=]/]
       column, op, value = conditions.split(/( [\<\>\=] )/).map(&:strip)
       { type: OPERATIONS[op], aggregation: column, value: value.to_f }
