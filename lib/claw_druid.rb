@@ -367,7 +367,7 @@ class ClawDruid
     else
       method_column(sentences)
 
-      { type: "fieldAccess", name: naming, fieldName: "#{method}(#{sentences})" }
+      { type: "fieldAccess", name: naming, fieldName: sentences }
     end
   end
 
