@@ -48,10 +48,10 @@ class ClawDruid
     return self if columns.all?{|column| column.blank? }
 
     # Add the 'i' to regex to be case-insensitive, cause the sum, max and min could be SUM, MAX and MIN
-    post_columns = columns.except{|column| column[/(sum|max|min).+[\+\-\*\/]/i] }
+    post_columns = columns.except{|column| column[/(sum|max|min|count).+[\+\-\*\/]/i] }
     @params[:postAggregations] = post_columns.map{|post_column| post_chain(post_column) } unless post_columns.blank?
 
-    method_columns = columns.except{|column| column.is_a?(String) && column[/(sum|max|min)\(.+\)/i] }
+    method_columns = columns.except{|column| column.is_a?(String) && column[/(sum|max|min|count)\(.+\)/i] }
     select_method_column(method_columns)
 
     lookup_columns = columns.except{|column| column.is_a? Hash }
@@ -364,7 +364,7 @@ class ClawDruid
         { type: "arithmetic", name: naming, fn: "/", fields: [post_chain(left), post_chain(right)] }
       end
     else
-      method    = sentences[/(sum|max|min)/i]
+      method    = sentences[/(sum|max|min|count)/i]
       sentences = sentences.gsub(method,"").gsub(/[\(\)]/,"")
       method.downcase!
 
@@ -391,7 +391,7 @@ class ClawDruid
 
   def select_method_column(columns)
     columns.each do |column|
-      method = column[/(sum|max|min)/i]
+      method = column[/(sum|max|min|count)/i]
       column = column.split(" as ")[0].gsub(/#{method}/i,"").gsub(/[\(\)]/,"")
       send(method, column)
     end if columns.present?
