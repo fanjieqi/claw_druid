@@ -153,8 +153,9 @@ class ClawDruid
     self
   end
 
-  def where(conditions)
-    if conditions.is_a?(Hash)
+  def where(*conditions)
+    if conditions[0].is_a?(Hash)
+      conditions = conditions[0]
       begin_date = conditions.delete(:begin_date)
       end_date = conditions.delete(:end_date)
       @params[:intervals] = ["#{begin_date}/#{end_date}"]
@@ -168,11 +169,11 @@ class ClawDruid
           { type: "in", dimension: column, values: values }
         end
       }.compact
-    elsif conditions.is_a?(Array) && conditions[0][" \?"]
-      conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" }
+    elsif conditions[0].is_a?(String)
+      conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" } if conditions[0][" \?"]
       conditions = [where_chain( conditions[0] )]
-    elsif conditions.is_a?(String)
-      conditions = [where_chain( conditions )]
+    else
+      conditions = nil
     end
 
     unless conditions.blank?
