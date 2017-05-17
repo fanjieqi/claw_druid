@@ -316,22 +316,31 @@ class ClawDruid
   private
 
   def where_chain(conditions)
-    # Todo: process the expression with brackets 
-    if conditions[" or "]
-      { type: "or", fields: conditions.split(" or ").map{|condition| where_chain(condition)} }
-    elsif conditions[" and "]
-      { type: "and", fields: conditions.split(" and ").map{|condition| where_chain(condition)} }
-    elsif conditions[" in "]
-      column, values = conditions.split(" in ").map(&:strip)
-      { type: "in", dimension: column, values: JSON.parse(values) }
+    conditions = conditions[1..-2] while conditions[0] == "\(" && conditions[-1] == "\)"
+
+    if conditions[/ (or|and) /]
+      %w(or and).each do |relation|
+        mark = " #{relation} "
+        if conditions[mark]
+          parts = conditions.split(mark)
+          return { type: relation, fields: parts.map{|part| where_chain(part)} } if check_brackets(parts)
+          
+          (parts.length - 2).downto(0) do |i|
+            left  = parts[0  .. i].join(mark)
+            right = parts[i+1..-1].join(mark)
+            return { type: relation, fields: [where_chain(left), where_chain(right)] } if check_brackets(left) && check_brackets(right)
+          end
+        end
+      end
     else
-      column, op, value = conditions.split(/ (\<|\>|\=|\~|regex) /).map(&:strip)
+      column, op, value = conditions.split(/ (\<|\>|\=|\~|regex|in) /).map(&:strip)
       case op
       when "=" then { type: "selector", dimension: column, value: value }
       when ">" then { type: "bound", dimension: column, lower: value, ordering: "numeric" }
       when "<" then { type: "bound", dimension: column, upper: value, ordering: "numeric" }
       when "~" then value = JSON.parse(value); { type: "bound", dimension: column, lower: value[0], upper: value[1], ordering: "numeric"}
       when "regex" then value.gsub!(/[\"\']/,""); { type: "regex", dimension: column, pattern: value }
+      when "in" then { type: "in", dimension: column, values: JSON.parse(values) }
       else nil
       end
     end
