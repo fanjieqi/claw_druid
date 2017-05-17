@@ -417,14 +417,8 @@ class ClawDruid
     send(method, column)
   end
 
-  def check_brackets(sentences)
-    if sentences.is_a?(Array)
-      sentences.all?{|sentence| sentence.scan("\(").count == sentence.scan("\)").count }
-    elsif sentences.is_a?(String)
-      sentences.scan("\(").count == sentences.scan("\)").count
-    else
-      false
-    end
+  def check_brackets(*sentences)
+    sentences.all?{|sentence| sentence.scan("\(").count == sentence.scan("\)").count }
   end
 
 end
