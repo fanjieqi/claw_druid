@@ -309,6 +309,10 @@ class ClawDruid
     to_a.map(&block)
   end
 
+  def get
+    HTTParty.get(@url).body
+  end
+
   private
 
   def where_chain(conditions)
