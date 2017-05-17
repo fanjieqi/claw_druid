@@ -338,11 +338,22 @@ class ClawDruid
   end
   
   def having_chain(conditions)
-    # Todo: process the expression with brackets 
-    if conditions[" and "] && !conditions[" or "]
-      { type: "and", havingSpecs: conditions.split(" and ").map{|condition| having_chain(condition)} }
-    elsif conditions[" or "]
-      { type: "or", havingSpecs: conditions.split(" or ").map{|condition| having_chain(condition)} }
+    conditions = conditions[1..-2] while conditions[0] == "\(" && conditions[-1] == "\)"
+    
+    if conditions[/ (or|and) /]
+      %w(or and).each do |relation|
+        mark = " #{relation} "
+        if conditions[mark]
+          parts = conditions.split(mark)
+          return { type: relation, havingSpecs: parts.map{|part| having_chain(part)} } if check_brackets(parts)
+          
+          (parts.length - 2).downto(0) do |i|
+            left  = parts[0  .. i].join(mark)
+            right = parts[i+1..-1].join(mark)
+            return { type: relation, havingSpecs: [having_chain(left), having_chain(right)] } if check_brackets(left) && check_brackets(right)
+          end
+        end
+      end
     elsif conditions[/[\<\>\=]/]
       column, op, value = conditions.split(/( [\<\>\=] )/).map(&:strip)
       { type: OPERATIONS[op], aggregation: column, value: value.to_f }
