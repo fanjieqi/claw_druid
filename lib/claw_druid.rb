@@ -187,8 +187,8 @@ class ClawDruid
     columns = columns[0] if columns[0].is_a?(Hash) || columns[0].is_a?(Array)
     
     if @params[:queryType] != "groupBy"
-      @params[:metric] ||= []
-      @params[:metric] += columns.is_a?(Hash) ? columns.keys : columns.map{|column| column[0] }
+      @params[:metric]   ||= []
+      @params[:metric]    += columns.map{|column, direction| column }
       @params[:descending] = columns.any?{|column, direction| direction.to_s[/desc/]}
     end
     @params[:limitSpec] = {
@@ -196,8 +196,8 @@ class ClawDruid
       limit: 500000,
       columns: columns.map{|column, direction| 
         {
-          dimension: (columns.is_a?(Hash) ? column : column).to_s,
-          direction: (columns.is_a?(Hash) ? direction : "asc").to_s[/asc/i] ? "ascending" : "descending",
+          dimension: column.to_s,
+          direction: direction.to_s[/desc/] ? "descending" : "ascending",
           dimensionOrder: "lexicographic"
         }
       }
