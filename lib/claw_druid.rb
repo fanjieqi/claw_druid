@@ -15,6 +15,12 @@ class ClawDruid
     '=' => 'equalTo'
   }
 
+  FnAggregates = {
+    "min" => "return Math.min(current, (COLUMN));",
+    "max" => "return Math.max(current, (COLUMN));",
+    "sum" => "return current + (COLUMN);"
+  }
+
   def initialize(params = {})
     @url        = params[:url]
     @params     = {dataSource: params[:source], granularity: "all", queryType: "select"}
@@ -64,80 +70,36 @@ class ClawDruid
     self
   end
 
-  def sum(*columns)
+  def meta_method(method, columns)
     columns = columns[0] if columns.count == 1 and columns[0].is_a?(Array)
 
     @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
     @params[:aggregations] ||= []
     @params[:aggregations] += columns.map{|column, naming| 
-      naming       ||= "sum(#{column})"
+      naming       ||=  "#{method}(#{column})"
+      fnAggregate    =  FnAggregates[method.to_s].gsub("COLUMN", column.to_s)
       if column[/( [\+\-\*\/] )/]
-        # split(/ [\+\-\*\/] /), and the result without the ' + ', ' - ', ' * ', ' / '
         fields = column.split(/ [\+\-\*\/] /)
         {
           type:         "javascript",
           name:         naming,
           fieldNames:   fields,
-          fnAggregate:  "function(current, #{fields.join(', ')}) { return current + (#{column}); }",
+          fnAggregate:  "function(current, #{fields.join(', ')}) { #{fnAggregate} }",
           fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
           fnReset:      "function()                   { return 0; }"
         }
       else
-        { type: "doubleSum", name: naming, fieldName: column } 
+        { type: "double#{method.capitalize}", name: naming, fieldName: column } 
       end
     }
     @params[:aggregations].uniq!
     self
   end
 
-  def max(*columns)
-    columns = columns[0] if columns.count == 1 and columns[0].is_a?(Array)
-
-    @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
-    @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column, naming| 
-      naming       ||= "max(#{column})"
-      if column[/( [\+\-\*\/] )/]
-        fields = column.split(/ [\+\-\*\/] /)
-        {
-          type:         "javascript",
-          name:         naming,
-          fieldNames:   fields,
-          fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.max(current, (#{column})); }",
-          fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
-          fnReset:      "function()                   { return 0; }"
-        }
-      else
-        { type: "doubleMax", name: naming, fieldName: column } 
-      end
-    }
-    @params[:aggregations].uniq!
-    self
-  end
-
-  def min(*columns)
-    columns = columns[0] if columns.count == 1 and columns[0].is_a?(Array)
-
-    @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
-    @params[:aggregations] ||= []
-    @params[:aggregations] += columns.map{|column, naming| 
-      naming       ||= "min(#{column})"
-      if column[/( [\+\-\*\/] )/]
-        fields = column.split(/ [\+\-\*\/] /)
-        {
-          type:         "javascript",
-          name:         naming,
-          fieldNames:   fields,
-          fnAggregate:  "function(current, #{fields.join(', ')}) { return Math.min(current, (#{column})); }",
-          fnCombine:    "function(partialA, partialB) { return partialA + partialB; }",
-          fnReset:      "function()                   { return 0; }"
-        }
-      else
-        { type: "doubleMin", name: naming, fieldName: column } 
-      end
-    }
-    @params[:aggregations].uniq!
-    self
+  [:min, :max, :sum].each do |method|
+    define_method(method) do |*columns|
+      meta_method(method, columns)
+    end
   end
 
   def count(*columns)
