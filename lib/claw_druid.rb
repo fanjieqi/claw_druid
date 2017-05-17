@@ -418,6 +418,7 @@ class ClawDruid
   end
 
   def check_brackets(*sentences)
+    sentences.flatten!
     sentences.all?{|sentence| sentence.scan("\(").count == sentence.scan("\)").count }
   end
 
