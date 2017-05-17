@@ -353,20 +353,20 @@ class ClawDruid
 
   def post_chain(sentences)
     sentences, naming  = sentences.split(" as ")
+    sentences = sentences[1..-2] while sentences[0] == "\(" && sentences[-2..-1] == "\)\)"
+    
     if sentences[/( (\+\+|\-\-|\*\*|\/\/) )/]
-      # Todo: process the expression with brackets 
-      if sentences[" ++ "]
-        { type: "arithmetic", name: naming, fn: "+", fields: sentences.split(" ++ ").map{|sentence| post_chain(sentence)} }
-      elsif sentences[" -- "]
-        # Count the left part firstly, then substract the right part
-        left, fn, right = sentences.rpartition(" -- ")
-        { type: "arithmetic", name: naming, fn: "-", fields: [post_chain(left), post_chain(right)] }
-      elsif sentences[" ** "]
-        { type: "arithmetic", name: naming, fn: "*", fields: sentences.split(" ** ").map{|sentence| post_chain(sentence)} }
-      elsif sentences[" // "]
-        # Count the left part firstly, then devided by the right part
-        left, fn, right = sentences.rpartition(" // ")
-        { type: "arithmetic", name: naming, fn: "/", fields: [post_chain(left), post_chain(right)] }
+      %w(+ - * /).each do |op|
+        double_op = " #{op*2} "
+        if sentences[double_op]
+          parts = sentences.split(double_op)
+
+          (parts.length - 2).downto(0) do |i|
+            left  = parts[0  .. i].join(double_op)
+            right = parts[i+1..-1].join(double_op)
+            return { type: "arithmetic", name: naming, fn: op, fields: [post_chain(left), post_chain(right)] } if check_brackets(left) && check_brackets(right)
+          end
+        end
       end
     else
       method_column(sentences)
@@ -395,6 +395,16 @@ class ClawDruid
 
     # Add the column to aggregations, which name is like sum(column), min(column), max(column), count(column)
     send(method, column)
+  end
+
+  def check_brackets(sentences)
+    if sentences.is_a?(Array)
+      sentences.all?{|sentence| sentence.scan("\(").count == sentence.scan("\)").count }
+    elsif sentences.is_a?(String)
+      sentences.scan("\(").count == sentences.scan("\)").count
+    else
+      false
+    end
   end
 
 end
