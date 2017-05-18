@@ -339,13 +339,13 @@ class ClawDruid
     
     if sentences[/( (\+\+|\-\-|\*\*|\/\/) )/]
       %w(+ - * /).each do |op|
-        double_op = " #{op*2} "
-        if sentences[double_op]
-          parts = sentences.split(double_op)
+        mark = " #{op*2} "
+        if sentences[mark]
+          parts = sentences.split(mark)
 
           (parts.length - 2).downto(0) do |i|
-            left  = parts[0  .. i].join(double_op)
-            right = parts[i+1..-1].join(double_op)
+            left  = parts[0  .. i].join(mark)
+            right = parts[i+1..-1].join(mark)
             return { type: "arithmetic", name: naming, fn: op, fields: [post_chain(left), post_chain(right)] } if check_brackets(left) && check_brackets(right)
           end
         end
