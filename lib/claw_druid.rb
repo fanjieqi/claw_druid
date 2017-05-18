@@ -293,11 +293,13 @@ class ClawDruid
         end
       end
     else
-      column, op, value = conditions.split(/ (\<|\>|\=|\~|regex|in) /).map(&:strip)
+      column, op, value = conditions.split(/ (\<|\>|\<\=|\>\=|\=|\~|regex|in) /).map(&:strip)
       case op
       when "=" then { type: "selector", dimension: column, value: value }
       when ">" then { type: "bound", dimension: column, lower: value, ordering: "numeric" }
+      when ">=" then { type: "bound", dimension: column, lower: value, ordering: "numeric", lowerStrict: false }
       when "<" then { type: "bound", dimension: column, upper: value, ordering: "numeric" }
+      when "<=" then { type: "bound", dimension: column, upper: value, ordering: "numeric", upperStrict: false }
       when "~" then value = JSON.parse(value); { type: "bound", dimension: column, lower: value[0], upper: value[1], ordering: "numeric"}
       when "regex" then value.gsub!(/[\"\']/,""); { type: "regex", dimension: column, pattern: value }
       when "in" then { type: "in", dimension: column, values: JSON.parse(values) }
