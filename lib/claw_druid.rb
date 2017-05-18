@@ -366,6 +366,7 @@ class ClawDruid
           dimension:  columns[:dimension] || columns["dimension"],
           outputName: columns[:output] || columns["output"],
           name:       columns[:name] || columns["name"],
+          retainMissingValue: true,
         }
       }
     end
