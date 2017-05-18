@@ -3,7 +3,7 @@ require 'json'
 require 'awesome_print'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/hash/transform_values'
-require './lib/array'
+require_relative './array'
 
 class ClawDruid
   include Enumerable
