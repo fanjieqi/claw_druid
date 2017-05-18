@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.description = "The ruby client of Druid."
   s.authors     = ["Fan Jieqi"]
   s.email       = 'fanjieqi@nibirutech.com'
-  s.files       = ["lib/claw_druid.rb"]
+  s.files       = Dir['lib/*.rb']
   s.homepage    = 'http://galileo.tap4fun.com/fanjieqi/claw_druid'
   s.license     = 'MIT'
 
