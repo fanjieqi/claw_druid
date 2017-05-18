@@ -107,8 +107,6 @@ class ClawDruid
     @params[:aggregations] ||= []
     if columns.empty?
       @params[:aggregations] << { type: "count", name: "count" }
-    elsif columns.count == 1
-      @params[:aggregations] << { type: "cardinality", name: "count(#{columns[0]})", fields: columns }
     else
       @params[:aggregations] += columns.map{|column| { type: "cardinality", name: "count(#{column})", fields: [column] } }
     end
