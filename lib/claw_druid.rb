@@ -259,7 +259,7 @@ class ClawDruid
   end
 
   def to_a
-    JSON.parse(query)[0]["result"]["events"]
+    @params[:queryType] == SegmentMetaData ? JSON.parse(query)[0]["columns"] : JSON.parse(query)[0]["result"]["events"]
   end
 
   def each(&block)
