@@ -21,6 +21,13 @@ class ClawDruid
     "sum" => "return current + (COLUMN);"
   }
 
+  TopN = "topN"
+  GroupBy = "groupBy"
+  TimeSeries = "timeseries"
+  TimeBoundary = "timeBoundary"
+  SegmentMetaData = "segmentMetadata"
+  DataSourceMetaData = "dataSourceMetadata"
+
   def initialize(params = {})
     @url        = params[:url]
     @params     = {dataSource: params[:source], granularity: "all", queryType: "select"}
@@ -33,7 +40,7 @@ class ClawDruid
   def group(*dimensions)
     dimensions = dimensions[0] if dimensions.count == 1 && dimensions[0].is_a?(Array)
 
-    @params[:queryType]  = "groupBy"
+    @params[:queryType]  = GroupBy
 
     lookup_dimensions = dimensions.except{|dimension| dimension.is_a? Hash }
     select_lookup(lookup_dimensions)
@@ -73,7 +80,7 @@ class ClawDruid
   def meta_method(method, columns)
     columns = columns[0] if columns.count == 1 and columns[0].is_a?(Array)
 
-    @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
+    @params[:queryType]    ||= TimeSeries
     @params[:aggregations] ||= []
     @params[:aggregations] += columns.map{|column, naming| 
       naming       ||=  "#{method}(#{column})"
@@ -103,7 +110,7 @@ class ClawDruid
   end
 
   def count(*columns)
-    @params[:queryType] = "timeseries" if @params[:queryType] != "groupBy"
+    @params[:queryType]    ||= TimeSeries
     @params[:aggregations] ||= []
     if columns.empty?
       @params[:aggregations] << { type: "count", name: "count" }
@@ -146,7 +153,7 @@ class ClawDruid
   def order(*columns)
     columns = columns[0] if columns[0].is_a?(Hash) || columns[0].is_a?(Array)
     
-    if @params[:queryType] != "groupBy"
+    if @params[:queryType] != GroupBy
       @params[:metric]   ||= []
       @params[:metric]    += columns.map{|column, direction| column }
       @params[:descending] = columns.any?{|column, direction| direction.to_s[/desc/]}
@@ -173,7 +180,7 @@ class ClawDruid
   end
 
   def top(top_count)
-    @params[:queryType] = "topN"
+    @params[:queryType] = TopN
     @params[:threshold] = top_count
     @params[:metric] = @params.delete(:limitSpec)[:columns][0] if @params[:limitSpec]
     self
@@ -228,29 +235,29 @@ class ClawDruid
   end
 
   def time_boundary
-    @params[:queryType] = "timeBoundary"
+    @params[:queryType] = TimeBoundary
     self
   end
 
   def max_time
-    @params[:queryType] = "timeBoundary"
+    @params[:queryType] = TimeBoundary
     @params[:bound]     = "maxTime"
     self
   end
 
   def min_time
-    @params[:queryType] = "timeBoundary"
+    @params[:queryType] = TimeBoundary
     @params[:bound]     = "minTime"
     self
   end
 
   def source_meta
-    @params[:queryType] = "dataSourceMetadata"
+    @params[:queryType] = DataSourceMetaData
     self
   end
 
   def segment_meta
-    @params[:queryType] = "segmentMetadata"
+    @params[:queryType] = SegmentMetaData
     self
   end
 
@@ -304,12 +311,12 @@ class ClawDruid
     else
       column, op, value = conditions.split(/ (\<|\>|\<\=|\>\=|\=|\~|regex|in) /).map(&:strip)
       case op
-      when "=" then { type: "selector", dimension: column, value: value }
-      when ">" then { type: "bound", dimension: column, lower: value, ordering: "numeric" }
+      when "="  then { type: "selector", dimension: column, value: value }
+      when ">"  then { type: "bound", dimension: column, lower: value, ordering: "numeric" }
       when ">=" then { type: "bound", dimension: column, lower: value, ordering: "numeric", lowerStrict: false }
-      when "<" then { type: "bound", dimension: column, upper: value, ordering: "numeric" }
+      when "<"  then { type: "bound", dimension: column, upper: value, ordering: "numeric" }
       when "<=" then { type: "bound", dimension: column, upper: value, ordering: "numeric", upperStrict: false }
-      when "~" then value = JSON.parse(value); { type: "bound", dimension: column, lower: value[0], upper: value[1], ordering: "numeric"}
+      when "~"  then value = JSON.parse(value); { type: "bound", dimension: column, lower: value[0], upper: value[1], ordering: "numeric"}
       when "regex" then value.gsub!(/[\"\']/,""); { type: "regex", dimension: column, pattern: value }
       when "in" then { type: "in", dimension: column, values: JSON.parse(values) }
       else nil
