@@ -1,3 +1,5 @@
 pkg
 
 lib/data.yml
+
+lib/tasks/test.rake
