@@ -270,7 +270,15 @@ class ClawDruid
   end
 
   def get
-    HTTParty.get(@url).body
+    result = HTTParty.get(@url)
+    puts result.code if ENV["DEBUG"]
+    result.body
+  end
+
+  def delete
+    result = HTTParty.delete(@url)
+    puts result.code if ENV["DEBUG"]
+    result.body
   end
 
   private
