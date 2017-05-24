@@ -153,3 +153,15 @@ client.source_meta
 ```ruby
 client.segment_meta
 ```
+
+## Enumerable
+```ruby
+records = client.where().group().sum()
+result  = records.to_a
+records.map do |record| 
+  # value
+end
+records.each do |record|
+  # do something
+end
+```
