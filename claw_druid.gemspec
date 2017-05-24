@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Fan Jieqi"]
   s.email       = 'fanjieqi@nibirutech.com'
   s.files       = Dir['lib/*.rb']
-  s.homepage    = 'http://galileo.tap4fun.com/fanjieqi/claw_druid'
+  s.homepage    = 'https://github.com/fanjieqi/claw_druid'
   s.license     = 'MIT'
 
   s.add_dependency 'rake', '~> 12.0'
