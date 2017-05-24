@@ -24,11 +24,14 @@ client = ClawDruid.new(url: 'http://druid_broker.com:port/druid/v2/', source: 't
 
 ## select
 The complex 'sum', 'max', 'min' and 'count' with operators will be transformed into [Post-Aggregations](http://druid.io/docs/0.10.0/querying/post-aggregations.html) automatically.
+The select of [lookups](http://druid.io/docs/latest/querying/lookups.html) shoud be a hash.
 ```ruby
 client.select(:dimension1, :dimension2, :column1, :column2)
 client.select("sum(column1) as sum_column1, sum(column2)")
 client.select("sum(column1 + column2) as col1_col2")
 client.select("(sum(column1 + column2) // sum(column3)) as col1_col2_col3")
+
+client.select({dimension: :game_cd, output: :game_name, name: :lookup_names})
 ```
 
 ## where
@@ -42,9 +45,12 @@ client.where(dimension1: [v1, v2, v3]) # dimension1 in (v1, v2, v4)
 
 ## group
 Add the dimensions to [dimensions](http://druid.io/docs/0.10.0/querying/dimensionspecs.html) by [groupBy](http://druid.io/docs/0.10.0/querying/groupbyquery.html).
+The groupby of [lookups](http://druid.io/docs/latest/querying/lookups.html) shoud be a hash.
 ```ruby
 client.group(:dimension1)
 client.group(:dimension1, :dimension2)
+
+client.group({dimension: :game_cd, output: :game_name, name: :lookup_names})
 ```
 
 ## having
