@@ -27,6 +27,15 @@ class ClawDruid
   SegmentMetaData = "segmentMetadata"
   DataSourceMetaData = "dataSourceMetadata"
 
+  Permit_Properties = {
+    TopN => [:queryType, :dataSource, :intervals, :granularity, :filter, :aggregations, :postAggregations, :dimension, :threshold, :metric, :context],
+    GroupBy => [:queryType, :dataSource, :dimensions, :limitSpec, :having, :granularity, :filter, :aggregations, :postAggregations, :intervals, :context],
+    TimeSeries => [:queryType, :dataSource, :descending, :intervals, :granularity, :filter, :aggregations, :postAggregations, :context],
+    TimeBoundary => [:queryType, :dataSource, :bound, :filter, :context],
+    SegmentMetaData => [:queryType, :dataSource, :intervals, :toInclude, :merge, :context, :analysisTypes, :lenientAggregatorMerge],
+    DataSourceMetaData => [:queryType, :dataSource, :context],
+  }
+
   def initialize(params = {})
     @url        = params[:url]
     @params     = {dataSource: params[:source], granularity: "all", queryType: "select"}
@@ -214,6 +223,7 @@ class ClawDruid
   end
 
   def query(params = @params, page_count = nil)
+    params = params.slice(*Permit_Properties[params[:queryType]])
     ap params if ENV['DEBUG']
     puts params.to_json if ENV['DEBUG']
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' })
