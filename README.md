@@ -31,7 +31,7 @@ client.select("sum(column1) as sum_column1, sum(column2)")
 client.select("sum(column1 + column2) as col1_col2")
 client.select("(sum(column1 + column2) // sum(column3)) as col1_col2_col3")
 
-client.select({dimension: :game_cd, output: :game_name, name: :lookup_names})
+client.select({dimension: :dimension_id, output: :dimension_name, name: :lookup_names})
 ```
 
 ## where
