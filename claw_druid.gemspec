@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'claw_druid'
-  s.version     = '0.0.3'
+  s.version     = '0.0.4'
   s.date        = Date.today.to_s
   s.summary     = "The ruby client of Druid."
   s.description = "The ruby client of Druid."
