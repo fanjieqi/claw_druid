@@ -21,6 +21,7 @@ class ClawDruid
   }
 
   TopN = "topN"
+  Select = "select"
   GroupBy = "groupBy"
   TimeSeries = "timeseries"
   TimeBoundary = "timeBoundary"
@@ -29,6 +30,7 @@ class ClawDruid
 
   Permit_Properties = {
     TopN => [:queryType, :dataSource, :intervals, :granularity, :filter, :aggregations, :postAggregations, :dimension, :threshold, :metric, :context],
+    Select => [:queryType, :dataSource, :intervals, :descending, :filter, :dimensions, :metrics, :pagingSpec, :context],
     GroupBy => [:queryType, :dataSource, :dimensions, :limitSpec, :having, :granularity, :filter, :aggregations, :postAggregations, :intervals, :context],
     TimeSeries => [:queryType, :dataSource, :descending, :intervals, :granularity, :filter, :aggregations, :postAggregations, :context],
     TimeBoundary => [:queryType, :dataSource, :bound, :filter, :context],
@@ -38,7 +40,7 @@ class ClawDruid
 
   def initialize(params = {})
     @url        = params[:url]
-    @params     = {dataSource: params[:source], granularity: "all", queryType: "select"}
+    @params     = {dataSource: params[:source], granularity: "all", queryType: Select}
     @threshold  = params[:threshold] || THRESHOLD
 
     # The page_identifiers of every query, the key is the params.hash of the query, the value is a identifiers like "publisher_daily_report_2017-02-02T00:00:00.000Z_2017-02-04T00:00:00.000Z_2017-03-30T12:10:27.053Z"
