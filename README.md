@@ -56,7 +56,9 @@ client.group({dimension: :game_cd, output: :game_name, name: :lookup_names})
 ## having
 Add the having conditions to [having](http://druid.io/docs/0.10.0/querying/having.html).
 ```
+client.group(:dimension1).having("sum(column1)" => v1)
 client.group(:dimension1).having("sum(column1) > #{v1}")
+client.group(:dimension1, :dimension2).having("sum(column1)" => v1, "sum(column2)" => v2)
 client.group(:dimension1, :dimension2).having("sum(column1) > ? and sum(column2) <= ?", v1, v2)
 ```
 
