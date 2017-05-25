@@ -202,7 +202,7 @@ class ClawDruid
     if page_count == 1
       @params[:pagingSpec] = {pagingIdentifiers: {}, threshold: @threshold}
     elsif page_count > 1
-      current = @params.hash
+      current = permit_params.reject{|key, value| key == :pagingSpec}.hash
       @paging_identifiers[current] ||= {0 => {}}
 
       (1..page_count-1).each do |current_page|
@@ -227,7 +227,7 @@ class ClawDruid
   end
 
   def query(params = @params, page_count = nil)
-    params = params.slice(*Permit_Properties[params[:queryType]])
+    params = permit_params(params)
     ap params if ENV['DEBUG']
     puts params.to_json if ENV['DEBUG']
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' })
@@ -415,6 +415,10 @@ class ClawDruid
   def check_brackets(*sentences)
     sentences.flatten!
     sentences.all?{|sentence| sentence.scan("\(").count == sentence.scan("\)").count }
+  end
+
+  def permit_params(params = @params)
+    params.slice(*Permit_Properties[params[:queryType]])
   end
 
 end
