@@ -58,6 +58,7 @@ class ClawDruid
     if dimensions && dimensions.count > 0
       @params[:dimensions] ||= []
       @params[:dimensions]  += dimensions.map(&:to_s).map(&:strip)
+      @params[:dimensions].uniq!
     end
     @params.delete(:metrics)
     self
@@ -83,6 +84,7 @@ class ClawDruid
     if columns && columns.count > 0
       @params[:metrics]    ||= []
       @params[:metrics]     += columns.map(&:to_s).map(&:strip)
+      @params[:metrics].uniq!
     end
     self
   end
@@ -398,6 +400,7 @@ class ClawDruid
           retainMissingValue: true,
         }
       }
+      @params[:dimensions].uniq!
     end
   end
 
