@@ -165,18 +165,18 @@ class ClawDruid
       @params[:metric]   ||= []
       @params[:metric]    += columns.map{|column, direction| column }
       @params[:descending] = columns.any?{|column, direction| direction.to_s[/desc/]}
-    end
-    @params[:limitSpec] = {
-      type: "default",
-      limit: 500000,
-      columns: columns.map{|column, direction| 
+    else
+      @params[:limitSpec]         ||= {}
+      @params[:limitSpec][:type]  ||= "default"
+      @params[:limitSpec][:limit] ||= 500000
+      @params[:limitSpec][:columns] = columns.map{|column, direction| 
         {
           dimension: column.to_s,
           direction: direction.to_s[/desc/] ? "descending" : "ascending",
           dimensionOrder: "lexicographic"
         }
       }
-    }
+    end
     self
   end
 
