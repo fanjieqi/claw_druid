@@ -108,7 +108,7 @@ client.group(:dimension1, :dimension2).having("min(column1) > ? and min(column2)
 ## limit
 Get the limited results by using [limit](http://druid.io/docs/latest/querying/limitspec.html).
 ```ruby
-client.where(dimension1: v1, dimension2: v2).select(:dimension1, :dimension2).limit(100)
+client.group(:dimension1, :dimension2).sum(:dimension1, :dimension2).limit(100)
 ```
 
 ## topN
