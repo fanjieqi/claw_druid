@@ -223,9 +223,12 @@ class ClawDruid
   def having(*conditions)
     # Process the ('a = ? and b = ?', 1, 2)
     conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" }
+    havings = [having_chain( conditions[0] )]
 
-    havings = having_chain(conditions[0])
-    @params[:having] = havings unless havings.blank?
+    unless havings.blank?
+      @params[:having]               ||= { type: "and", havingSpecs: [] }
+      @params[:having][:havingSpecs]  += havings
+    end
     
     self
   end
