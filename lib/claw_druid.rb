@@ -30,7 +30,7 @@ class ClawDruid
 
   Permit_Properties = {
     TopN => [:queryType, :dataSource, :intervals, :granularity, :filter, :aggregations, :postAggregations, :dimension, :threshold, :metric, :context],
-    Select => [:queryType, :dataSource, :intervals, :descending, :filter, :dimensions, :metrics, :pagingSpec, :context],
+    Select => [:queryType, :dataSource, :intervals, :granularity, :descending, :filter, :dimensions, :metrics, :pagingSpec, :context],
     GroupBy => [:queryType, :dataSource, :dimensions, :limitSpec, :having, :granularity, :filter, :aggregations, :postAggregations, :intervals, :context],
     TimeSeries => [:queryType, :dataSource, :descending, :intervals, :granularity, :filter, :aggregations, :postAggregations, :context],
     TimeBoundary => [:queryType, :dataSource, :bound, :filter, :context],
