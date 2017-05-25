@@ -230,6 +230,7 @@ class ClawDruid
     puts params.to_json if ENV['DEBUG']
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' })
     puts result.code if ENV['DEBUG']
+    result = result.body
 
     # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
     if page_count && result["pagingIdentifiers"]
@@ -238,11 +239,11 @@ class ClawDruid
 
       # The pagingIdentifiers is something like { "publisher_daily_report_2017-03-01T00:00:00.000Z_2017-03-11T00:00:00.000Z_2017-04-17T21:04:30.804Z" => -10 }
       @paging_identifiers[current]            ||= {}
-      @paging_identifiers[current][page_count]  = JSON.parse(result.body)[0]["result"]["pagingIdentifiers"].transform_values{|value| value + 1}
+      @paging_identifiers[current][page_count]  = JSON.parse(result)[0]["result"]["pagingIdentifiers"].transform_values{|value| value + 1}
     end
     # ap JSON.parse(result) if ENV['DEBUG']
     
-    result.body
+    result
   end
 
   def time_boundary
