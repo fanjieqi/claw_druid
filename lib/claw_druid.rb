@@ -149,6 +149,7 @@ class ClawDruid
         end
       }.compact
     elsif conditions[0].is_a?(String)
+      # Process the ('a = ? and b = ?', 1, 2)
       conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" } if conditions[0][" \?"]
       conditions = [where_chain( conditions[0] )]
     else
@@ -221,13 +222,23 @@ class ClawDruid
   end
 
   def having(*conditions)
-    # Process the ('a = ? and b = ?', 1, 2)
-    conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" }
-    havings = [having_chain( conditions[0] )]
+    if conditions[0].is_a?(Hash)
+      conditions = conditions[0]
 
-    unless havings.blank?
+      conditions = conditions.delete_if{|key, value| value.blank?}.map{|column, value|
+        { type: OPERATIONS["="], aggregation: column, value: value }
+      }.compact
+    elsif conditions[0].is_a?(String)
+      # Process the ('a = ? and b = ?', 1, 2)
+      conditions[0].gsub!(" \?").each_with_index { |v, i| " #{conditions[i + 1]}" }
+      conditions = [having_chain( conditions[0] )]
+    else
+      conditions = nil
+    end
+
+    unless conditions.blank?
       @params[:having]               ||= { type: "and", havingSpecs: [] }
-      @params[:having][:havingSpecs]  += havings
+      @params[:having][:havingSpecs]  += conditions
     end
     
     self
