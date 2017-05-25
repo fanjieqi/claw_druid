@@ -207,7 +207,11 @@ class ClawDruid
 
       (1..page_count-1).each do |current_page|
         if begin @paging_identifiers[current][current_page].nil? rescue true end
-          query(@params.merge(pagingSpec: {pagingIdentifiers: @paging_identifiers[current][current_page-1], threshold: @threshold}), current_page)
+          result = query(@params.merge(pagingSpec: {pagingIdentifiers: @paging_identifiers[current][current_page-1], threshold: @threshold}))
+          
+          # The pagingIdentifiers is something like { "publisher_daily_report_2017-03-01T00:00:00.000Z_2017-03-11T00:00:00.000Z_2017-04-17T21:04:30.804Z" => -10 }
+          @paging_identifiers[current]              ||= {}
+          @paging_identifiers[current][current_page]  = JSON.parse(result)[0]["result"]["pagingIdentifiers"].transform_values{|value| value + 1}
         end
       end if begin @paging_identifiers[current][page_count - 1].nil? rescue true end
 
@@ -226,26 +230,13 @@ class ClawDruid
     self
   end
 
-  def query(params = @params, page_count = nil)
+  def query(params = @params)
     params = permit_params(params)
     ap params if ENV['DEBUG']
     puts params.to_json if ENV['DEBUG']
     result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' })
     puts result.code if ENV['DEBUG']
-    result = result.body
-
-    # The result is a String, try to find the existence of substring 'pagingIdentifiers'.
-    if page_count && result["pagingIdentifiers"]
-      params.delete(:pagingSpec)
-      current = params.hash
-
-      # The pagingIdentifiers is something like { "publisher_daily_report_2017-03-01T00:00:00.000Z_2017-03-11T00:00:00.000Z_2017-04-17T21:04:30.804Z" => -10 }
-      @paging_identifiers[current]            ||= {}
-      @paging_identifiers[current][page_count]  = JSON.parse(result)[0]["result"]["pagingIdentifiers"].transform_values{|value| value + 1}
-    end
-    # ap JSON.parse(result) if ENV['DEBUG']
-    
-    result
+    result.body
   end
 
   def time_boundary
