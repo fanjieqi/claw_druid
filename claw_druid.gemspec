@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name        = 'claw_druid'
-  s.version     = '0.0.4'
+  s.version     = '0.0.5'
   s.date        = Date.today.to_s
-  s.summary     = "The ruby client of Druid."
-  s.description = "The ruby client of Druid."
+  s.summary     = "A ruby client of Druid."
+  s.description = "A ruby client of Druid."
   s.authors     = ["Fan Jieqi"]
   s.email       = 'fjqqiqi@163.com'
   s.files       = Dir['lib/*.rb']
