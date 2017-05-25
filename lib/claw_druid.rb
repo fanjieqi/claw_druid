@@ -309,6 +309,12 @@ class ClawDruid
     result.body
   end
 
+  def post(params = {})
+    result = HTTParty.post(@url, body: params.to_json, headers: { 'Content-Type' => 'application/json' })
+    puts result.code if ENV['DEBUG']
+    result.body
+  end
+
   private
 
   def where_chain(conditions)
