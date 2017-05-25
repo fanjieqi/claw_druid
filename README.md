@@ -127,6 +127,13 @@ client.where(dimension1: v1, dimension2: v2).select(:dimension1, :dimension2).or
 client.where(dimension1: v1, dimension2: v2).select(:dimension1, :dimension2).order(dimension1: :desc, :dimension2)
 ```
 
+## page
+The [page](http://druid.io/docs/latest/querying/select-query.html#result-pagination) method could only using in [Select](http://druid.io/docs/latest/querying/select-query.html).
+```ruby
+client.where(dimension1: v1).page(1)
+client.where(dimension1: v1).page(2)
+```
+
 ## Intervals
 Set the intervals by adding begin_time and end_time to where conditions.
 ```ruby
