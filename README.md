@@ -9,13 +9,13 @@ A Ruby client for [Druid](http://druid.io).
 Add following line to Gemfile:
 
 ```
-gem 'claw_druid', '~> 0.0.4'
+gem 'claw_druid', '~> 0.0.5'
 ```
 
 Install it directly:
 
 ```
-gem install claw_druid -v 0.0.4
+gem install claw_druid -v 0.0.5
 ```
 
 ## Initization
