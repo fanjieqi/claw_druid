@@ -1,5 +1,7 @@
 # claw_druid
 
+[![Gem Version](https://badge.fury.io/rb/claw_druid.svg)](https://badge.fury.io/rb/claw_druid)
+
 A Ruby client for [Druid](http://druid.io).
 
 ## Installation
